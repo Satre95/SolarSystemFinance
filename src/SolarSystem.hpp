@@ -2,6 +2,7 @@
 #include "ofMain.h"
 #include "SSParticle.hpp"
 #include "SSPlanet.hpp"
+#include "ofxGui.h"
 
 class SolarSystem {
 public:
@@ -10,10 +11,13 @@ public:
 	SolarSystem(int numParticles = 10000, int numPlanets = 20);
 
 	void draw();
+	void update();
 
 	//----------------------------------------------
 	//MARK: Public Vars
 	int numParticles, numPlanets;
+	ofParameter<float> gravityConstant = 0.01f;
+	ofParameter<float> timeStep = 0.1f;
 
 private:
 	//----------------------------------------------
@@ -21,6 +25,9 @@ private:
 	void initBuffers();
 	void drawParticles();
 	void drawPlanets();
+
+	void updateParticles();
+	void updatePlanets();
 
 	//----------------------------------------------
 	//MARK: Private Vars

@@ -18,4 +18,5 @@ struct SSParticle
 	ofVec3f vel;
 	ofVec3f force;
 	ofFloatColor color;
+	static float mass;
 };

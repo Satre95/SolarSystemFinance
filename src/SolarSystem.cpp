@@ -1,6 +1,8 @@
 #include "SolarSystem.hpp"
 #include "Utilities.hpp"
 
+float SSParticle::mass = 10.0f;
+
 SolarSystem::SolarSystem(int numParticles, int numPlanets) {
 	this->numParticles = numParticles;
 	this->numPlanets = numPlanets;
@@ -12,7 +14,7 @@ SolarSystem::SolarSystem(int numParticles, int numPlanets) {
 
 	//Init the planets
 	for (int j = 0; j < numPlanets; j++) {
-		planets.emplace_back(Utilities::randomPointBetweenSpheres(15.0f, 30.0f));
+		planets.emplace_back(Utilities::randomPointBetweenSpheres(15.0f, 30.0f), 400.0f);
 	}
 
 	//setup shaders
@@ -74,4 +76,36 @@ void SolarSystem::drawPlanets() {
 	planetsVbo.draw(GL_POINTS, 0, numPlanets);
 	glPointSize(currPointSize);
 	celestialShader.end();
+}
+
+void SolarSystem::update() {
+	updatePlanets();
+	updateParticles();
+}
+
+void SolarSystem::updateParticles() {
+	//Iterate over every planet, adding up forces along the way.
+	for (SSParticle & p : particles) {
+		p.force = ofVec3f(0);
+
+		for (SSPlanet & aPlanet : planets) {
+			//F = G * M * m / r^2
+			float f = gravityConstant * aPlanet.mass * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
+			ofVec3f force((aPlanet.pos - p.pos) * f);
+			p.force += force;
+		}
+	}
+
+	//Perform foward Euler integration 
+	for (SSParticle & p : particles) {
+		ofVec3f acc = p.force / p.mass;
+		p.vel = p.vel + acc * timeStep;
+		p.pos = p.pos + ofVec4f(p.vel * timeStep);
+	}
+
+	//Update buffer and vbo
+	particlesBuf.updateData(particles);
+}
+
+void SolarSystem::updatePlanets() {
 }
