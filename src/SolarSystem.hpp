@@ -19,7 +19,6 @@ private:
 	//----------------------------------------------
 	//MARK: Private Methods
 	void initBuffers();
-	void initShader();
 	void drawParticles();
 	void drawPlanets();
 
