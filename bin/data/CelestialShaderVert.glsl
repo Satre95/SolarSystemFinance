@@ -1,10 +1,12 @@
 #version 410 core
 
-layout (location = 0) in vec3 position;
-layout (location = 0) in vec4 color;
+in vec4 position;
+in vec4 color;
 
+out vec4 fragColor;
 uniform mat4 modelViewProjectionMatrix;
 
 void main() {
-	gl_Position = modelViewProjectionMatrix * vec4(position, 1.0f);
+	gl_Position = modelViewProjectionMatrix * position;
+	fragColor = color;
 }
