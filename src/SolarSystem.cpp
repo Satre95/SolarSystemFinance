@@ -9,12 +9,16 @@ SolarSystem::SolarSystem(int numParticles, int numPlanets) {
 
 	//Init the particles
 	for (int i = 0; i < numParticles; i++) {
-		particles.emplace_back(Utilities::randomPointInSphere(40.0f));
+		particles.emplace_back(Utilities::randomPointInSphere(200.0f));
 	}
 
 	//Init the planets
 	for (int j = 0; j < numPlanets; j++) {
-		planets.emplace_back(Utilities::randomPointBetweenSpheres(15.0f, 30.0f), 400.0f);
+		ofVec3f pos = Utilities::randomPointOnSphere(200.0f);
+		ofVec3f vel = Utilities::randomPointBetweenSpheres(10, 15);
+		planets.emplace_back(pos,
+							vel,
+							ofRandom(2000, 4000));
 	}
 
 	//setup shaders
@@ -88,7 +92,7 @@ void SolarSystem::updateParticles() {
 	for (SSParticle & p : particles) {
 		p.force = ofVec3f(0);
 
-		for (SSPlanet & aPlanet : planets) {
+		for (const SSPlanet & aPlanet : planets) {
 			//F = G * M * m / r^2
 			float f = gravityConstant * aPlanet.mass * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
 			ofVec3f force((aPlanet.pos - p.pos) * f);
@@ -108,4 +112,16 @@ void SolarSystem::updateParticles() {
 }
 
 void SolarSystem::updatePlanets() {
+	//Imagine there is a star at origin
+	for (SSPlanet & aPlanet : planets) {
+		aPlanet.force = ofVec3f(0);
+		float fMag = gravityConstant * solarMass * aPlanet.mass / pow(ofVec3f(aPlanet.pos).length(), 2);
+		aPlanet.force = -ofVec3f(aPlanet.pos) * fMag;
+		ofVec3f acc = aPlanet.force / aPlanet.mass;
+		aPlanet.vel = aPlanet.vel + acc * timeStep;
+		aPlanet.pos = aPlanet.pos + ofVec4f(aPlanet.vel * timeStep);
+	}
+
+	//Update the buffer
+	planetsBuf.updateData(planets);
 }

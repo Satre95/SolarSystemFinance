@@ -18,6 +18,7 @@ public:
 	int numParticles, numPlanets;
 	ofParameter<float> gravityConstant = 0.01f;
 	ofParameter<float> timeStep = 0.1f;
+	ofParameter<float> solarMass = 10000.0f;
 
 private:
 	//----------------------------------------------

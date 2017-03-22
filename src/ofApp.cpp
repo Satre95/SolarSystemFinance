@@ -2,10 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	ss = new SolarSystem(1000, 5);
+	ss = new SolarSystem(5000, 25);
 	camera.setTarget(ofVec3f(0));
 	//camera.setAutoDistance(true);
-	camera.setNearClip(0.01f);
+	camera.setNearClip(1.0f);
 }
 
 //--------------------------------------------------------------
@@ -18,6 +18,10 @@ void ofApp::draw() {
 	camera.begin();
 	ss->draw();
 	camera.end();
+
+	stringstream ss;
+	ss << "Framerate: " << ofGetFrameRate();
+	ofDrawBitmapString(ss.str(), ofPoint(10, 10));
 }
 
 //--------------------------------------------------------------
