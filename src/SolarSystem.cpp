@@ -14,15 +14,20 @@ SolarSystem::SolarSystem(int numParticles, int numPlanets) {
 	for (int j = 0; j < numPlanets; j++) {
 		planets.emplace_back(Utilities::randomPointBetweenSpheres(10.0f, 20.0f));
 	}
+
+	//setup shaders
+	initShader();
+	//Setup buffers and vbo's
+	initBuffers();
 }
 
 void SolarSystem::initBuffers() {
 	//allocated the particles buffer and setup pointer for shader
 	particlesBuf.allocate(particles, GL_DYNAMIC_DRAW);
 	particlesVbo.setAttributeBuffer(celestialShader.getAttributeLocation("position"),
-		particlesBuf, 
-		3, 
-		sizeof(SSParticle), 
+		particlesBuf,
+		3,
+		sizeof(SSParticle),
 		offsetof(SSParticle, pos));
 	particlesVbo.setAttributeBuffer(celestialShader.getAttributeLocation("color"),
 		particlesBuf,
@@ -42,6 +47,9 @@ void SolarSystem::initBuffers() {
 		4,
 		sizeof(SSPlanet),
 		offsetof(SSPlanet, color));
+}
 
-
+void SolarSystem::initShader() {
+	celestialShader.load("CelestialShaderVert.glsl", "CelestialShaderFrag.glsl");
+	celestialShader.linkProgram();
 }

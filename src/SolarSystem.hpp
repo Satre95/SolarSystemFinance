@@ -17,6 +17,7 @@ private:
 	//----------------------------------------------
 	//MARK: Private Methods
 	void initBuffers();
+	void initShader();
 
 	//----------------------------------------------
 	//MARK: Private Vars

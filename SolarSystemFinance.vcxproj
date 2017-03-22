@@ -215,6 +215,10 @@
       <AdditionalIncludeDirectories>$(OF_ROOT)\libs\openFrameworksCompiled\project\vs</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\data\CelestialShaderFrag.glsl" />
+    <None Include="bin\data\CelestialShaderVert.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ProjectExtensions>
     <VisualStudio>
