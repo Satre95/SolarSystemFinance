@@ -9,6 +9,8 @@ public:
 	//MARK: Public Methods
 	SolarSystem(int numParticles = 10000, int numPlanets = 20);
 
+	void draw();
+
 	//----------------------------------------------
 	//MARK: Public Vars
 	int numParticles, numPlanets;
@@ -18,6 +20,8 @@ private:
 	//MARK: Private Methods
 	void initBuffers();
 	void initShader();
+	void drawParticles();
+	void drawPlanets();
 
 	//----------------------------------------------
 	//MARK: Private Vars

@@ -53,3 +53,20 @@ void SolarSystem::initShader() {
 	celestialShader.load("CelestialShaderVert.glsl", "CelestialShaderFrag.glsl");
 	celestialShader.linkProgram();
 }
+
+void SolarSystem::draw() {
+	drawParticles();
+	drawPlanets();
+}
+
+void SolarSystem::drawParticles() {
+	celestialShader.begin();
+	particlesVbo.draw(GL_POINTS, 0, numParticles);
+	celestialShader.end();
+}
+
+void SolarSystem::drawPlanets() {
+	celestialShader.begin();
+	planetsVbo.draw(GL_POINTS, 0, numPlanets);
+	celestialShader.end();
+}
