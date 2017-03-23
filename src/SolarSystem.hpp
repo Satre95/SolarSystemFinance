@@ -4,6 +4,10 @@
 #include "SSPlanet.hpp"
 #include "ofxGui.h"
 #include "ofxJSON.h"
+#include <boost/thread/barrier.hpp>
+
+
+#define NUM_PROC 4
 
 class SolarSystem {
 public:
@@ -27,7 +31,7 @@ public:
 	//MARK: Public Vars
 	int numParticles, numPlanets;
 	ofParameter<float> gravityConstant = 0.01f;
-	ofParameter<float> timeStep = 0.1f;
+	ofParameter<float> timeStep = 0.4f;
 	ofParameter<float> solarMass = 10000.0f;
 
 private:
@@ -44,7 +48,7 @@ private:
 	//MARK: Private Vars
 
 	vector<SSParticle> particles;
-	vector<SSPlanet> planets;
+    vector<SSPlanet> planets;
 
 	ofBufferObject particlesBuf;
 	ofBufferObject planetsBuf;
@@ -54,4 +58,5 @@ private:
 	StockUpdater dataFetcher;
 	ofImage planetImage;
 	ofImage particleImage;
+    boost::barrier bar;
 };

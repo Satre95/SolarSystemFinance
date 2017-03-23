@@ -3,19 +3,19 @@
 
 float SSParticle::mass = 10.0f;
 
-SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles) {
-	this->numParticles = numParticles;
+SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles): bar(3) {
+    this->numParticles = Utilities::roundUp(numParticles, NUM_PROC);
 	this->numPlanets = (int)stockSymbols.size();
 	this->stocks = stockSymbols;
 
 	//Init the particles
 	for (int i = 0; i < numParticles; i++) {
-		particles.emplace_back(Utilities::randomPointInSphere(200.0f));
+		particles.emplace_back(Utilities::randomPointBetweenSpheres(1000.0f, 3000.0f));
 	}
 
 	//Init the planets
 	for (int j = 0; j < numPlanets; j++) {
-		ofVec3f pos = Utilities::randomPointOnSphere(200.0f);
+		ofVec3f pos = Utilities::randomPointBetweenSpheres(1000.0f, 3000.0f);
 		ofVec3f vel = Utilities::randomPointBetweenSpheres(10, 15);
 		planets.emplace_back(pos,
 							vel,
@@ -75,11 +75,17 @@ void SolarSystem::initBuffers() {
 void SolarSystem::draw() {
 	drawParticles();
 	drawPlanets();
+    
+    for(int i = 0; i < (int)planets.size(); i++) {
+        auto & aPlanet = planets.at(i);
+        ofDrawBitmapString(stocks.at(i), aPlanet.pos.x, aPlanet.pos.y,aPlanet.pos.z);
+    }
 }
 
 void SolarSystem::drawParticles() {
 	celestialShader.begin();
 	particleImage.getTexture().bind();
+    glPointSize(8.0f);
 	particlesVbo.draw(GL_POINTS, 0, numParticles);
 	particleImage.getTexture().unbind();
 	celestialShader.end();
@@ -88,6 +94,7 @@ void SolarSystem::drawParticles() {
 void SolarSystem::drawPlanets() {
 	celestialShader.begin();
 	planetImage.getTexture().bind();
+    glPointSize(20.0f);
 	planetsVbo.draw(GL_POINTS, 0, numPlanets);
 	planetImage.getTexture().unbind();
 	celestialShader.end();
@@ -102,24 +109,58 @@ void SolarSystem::update() {
 }
 
 void SolarSystem::updateParticles() {
-	//Iterate over every planet, adding up forces along the way.
-	for (SSParticle & p : particles) {
-		p.force = ofVec3f(0);
-
-		for (SSPlanet & aPlanet : planets) {
-			//F = G * M * m / r^2
-			float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
-			ofVec3f force((aPlanet.pos - p.pos) * f);
-			p.force += force;
-		}
-	}
-
-	//Perform foward Euler integration 
-	for (SSParticle & p : particles) {
-		ofVec3f acc = p.force / p.mass;
-		p.vel = p.vel + acc * timeStep;
-		p.pos = p.pos + ofVec4f(p.vel * timeStep);
-	}
+    
+    //Iterate over every planet, adding up forces along the way.
+    for (SSParticle & p : particles) {
+        p.force = ofVec3f(0);
+        
+        for (SSPlanet & aPlanet : planets) {
+            //F = G * M * m / r^2
+            float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
+            ofVec3f force((aPlanet.pos - p.pos) * f);
+            p.force += force;
+        }
+    }
+    
+    //Perform foward Euler integration
+    for (SSParticle & p : particles) {
+        ofVec3f acc = p.force / p.mass;
+        p.vel = p.vel + acc * timeStep;
+        p.pos = p.pos + ofVec4f(p.vel * timeStep);
+    }
+//    vector<std::unique_ptr<std::thread>> threads;
+//    
+//    for(int i = 0; i < NUM_PROC; i++) {
+//        threads.emplace_back(new std::thread([this]() {
+//            //Iterate over every planet, adding up forces along the way.
+//            int start = NUM_PROC * this_thread::get_id();
+//            for (int i = start; i < end; i++) {
+//                auto & p = particles.at(i);
+//                p.force = ofVec3f(0);
+//                
+//                for (SSPlanet & aPlanet : planets) {
+//                    //F = G * M * m / r^2
+//                    float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
+//                    ofVec3f force((aPlanet.pos - p.pos) * f);
+//                    p.force += force;
+//                }
+//            }
+//            
+//            //Perform foward Euler integration
+//            for (int i = start; i < end; i++) {
+//                auto & p = particles.at(i);
+//                ofVec3f acc = p.force / p.mass;
+//                p.vel = p.vel + acc * timeStep;
+//                p.pos = p.pos + ofVec4f(p.vel * timeStep);
+//                
+//            }
+//            
+//            bar.wait();
+//        }, this));
+//    }
+//    
+//    for(auto & aThread: threads)
+//        aThread->join();
 
 	//Update buffer and vbo
 	particlesBuf.updateData(particles);

@@ -2,33 +2,45 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	vector<string> stocks = {
-		"AAPL", "MSFT", "GOOG", "AMZN", "FB", "JNJ"
+	stocks = {
+		"FB", "JNJ",
+        "XOM", "JPM", "WFC", "DIS", "GE", "NUGT", "SNAP"
 	};
-	ss = new SolarSystem(stocks, 5000);
+	ss = new SolarSystem(stocks, 20000);
 	camera.setTarget(ofVec3f(0));
-	//camera.setAutoDistance(true);
+	camera.setAutoDistance(true);
 	camera.setNearClip(1.0f);
+    camera.setFarClip(10000.0f);
+    
+    paused = true;
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+    if(paused) return;
 	ss->update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    ofBackground(0);
 	camera.begin();
 	ss->draw();
-	camera.end();
+    camera.end();
 
 	stringstream sstream;
 	sstream << "Framerate: " << ofGetFrameRate();
 	ofDrawBitmapString(sstream.str(), ofPoint(10, 10));
+   
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
+    if(key == 'f') {
+        ofToggleFullscreen();
+    } else if(key == 'p') {
+        paused = !paused;
+    }
 }
 
 //--------------------------------------------------------------

@@ -21,7 +21,9 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 	void exit();
-
+    
+    vector<string> stocks;
 	SolarSystem * ss;
 	ofEasyCam camera;
+    bool paused = false;
 };
