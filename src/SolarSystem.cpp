@@ -91,6 +91,9 @@ void SolarSystem::drawPlanets() {
 void SolarSystem::update() {
 	updatePlanets();
 	updateParticles();
+	if (!dataFetcher.isThreadRunning()) {
+		dataFetcher.startThread(true);
+	}
 }
 
 void SolarSystem::updateParticles() {
