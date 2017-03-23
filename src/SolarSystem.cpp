@@ -3,9 +3,10 @@
 
 float SSParticle::mass = 10.0f;
 
-SolarSystem::SolarSystem(int numParticles, int numPlanets) {
+SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles) {
 	this->numParticles = numParticles;
-	this->numPlanets = numPlanets;
+	this->numPlanets = (int)stockSymbols.size();
+	this->stocks = stockSymbols;
 
 	//Init the particles
 	for (int i = 0; i < numParticles; i++) {
@@ -25,6 +26,10 @@ SolarSystem::SolarSystem(int numParticles, int numPlanets) {
 	celestialShader.load("CelestialShaderVert.glsl", "CelestialShaderFrag.glsl");
 	//Setup buffers and vbo's
 	initBuffers();
+
+	dataFetcher.stocksPtr = &stocks;
+	dataFetcher.planetsPtr = &planets;
+	dataFetcher.startThread(true);
 }
 
 void SolarSystem::initBuffers() {
@@ -56,6 +61,7 @@ void SolarSystem::initBuffers() {
 		sizeof(SSPlanet),
 		offsetof(SSPlanet, color));
 }
+
 
 void SolarSystem::draw() {
 	drawParticles();
@@ -124,4 +130,30 @@ void SolarSystem::updatePlanets() {
 
 	//Update the buffer
 	planetsBuf.updateData(planets);
+}
+
+void SolarSystem::updateStocks() {
+	//Do all of the stock fetching in a parallel thread 
+	//Avoid clogging up framerate.
+
+}
+
+void SolarSystem::StockUpdater::threadedFunction() {
+	auto & stocks = *stocksPtr;
+	auto & planets = *planetsPtr;
+	ofxJSONElement json;
+
+	for (int i = 0; i < stocks.size(); i++) {
+		string & aStock = stocks.at(i);
+		ofHttpResponse resp = ofLoadURL(stockURL + aStock);
+		string data = resp.data.getText();
+		data.erase(0, 6);
+		data.erase(data.end() - 2, data.end());
+
+		bool parseSuccess = json.parse(data);
+
+		if (parseSuccess) {
+			ofLogNotice() << "Stock " << json["t"].asString() << " price is " << json["l"].asString();
+		}
+	}
 }

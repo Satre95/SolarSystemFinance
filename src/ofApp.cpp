@@ -2,7 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	ss = new SolarSystem(5000, 25);
+	vector<string> stocks = {
+		"AAPL", "MSFT", "GOOG", "BRK-A", "AMZN", "FB", "JNJ"
+	};
+	ss = new SolarSystem(stocks, 5000);
 	camera.setTarget(ofVec3f(0));
 	//camera.setAutoDistance(true);
 	camera.setNearClip(1.0f);
@@ -19,9 +22,9 @@ void ofApp::draw() {
 	ss->draw();
 	camera.end();
 
-	stringstream ss;
-	ss << "Framerate: " << ofGetFrameRate();
-	ofDrawBitmapString(ss.str(), ofPoint(10, 10));
+	stringstream sstream;
+	sstream << "Framerate: " << ofGetFrameRate();
+	ofDrawBitmapString(sstream.str(), ofPoint(10, 10));
 }
 
 //--------------------------------------------------------------
@@ -66,4 +69,9 @@ void ofApp::gotMessage(ofMessage msg) {
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) {
+}
+
+//--------------------------------------------------------------
+void ofApp::exit() {
+	delete ss;
 }
