@@ -1,5 +1,6 @@
 #pragma once
 #include "ofMain.h"
+#include <mutex>
 
 struct SSPlanet {
 	SSPlanet() {
@@ -14,6 +15,26 @@ struct SSPlanet {
 		color = ofFloatColor(1.0f, 0, 0, 1.0f);
 		this->mass = mass;
 	}
+
+	SSPlanet(const SSPlanet & other) {
+		pos = other.pos;
+		vel = other.vel;
+		force = other.force;
+		color = other.color;
+		mass = other.mass;
+	}
+
+	float getMass() {
+		std::lock_guard<std::mutex> lock(massMutex);
+		return mass;
+	}
+
+	void setMass(float m) {
+		std::lock_guard<std::mutex> lock(massMutex);
+		mass = m;
+	}
+
+	std::mutex massMutex;
 
 	ofVec4f pos;
 	ofVec3f vel;

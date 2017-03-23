@@ -101,9 +101,9 @@ void SolarSystem::updateParticles() {
 	for (SSParticle & p : particles) {
 		p.force = ofVec3f(0);
 
-		for (const SSPlanet & aPlanet : planets) {
+		for (SSPlanet & aPlanet : planets) {
 			//F = G * M * m / r^2
-			float f = gravityConstant * aPlanet.mass * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
+			float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
 			ofVec3f force((aPlanet.pos - p.pos) * f);
 			p.force += force;
 		}
@@ -124,21 +124,15 @@ void SolarSystem::updatePlanets() {
 	//Imagine there is a star at origin
 	for (SSPlanet & aPlanet : planets) {
 		aPlanet.force = ofVec3f(0);
-		float fMag = gravityConstant * solarMass * aPlanet.mass / pow(ofVec3f(aPlanet.pos).length(), 2);
+		float fMag = gravityConstant * solarMass * aPlanet.getMass() / pow(ofVec3f(aPlanet.pos).length(), 2);
 		aPlanet.force = -ofVec3f(aPlanet.pos) * fMag;
-		ofVec3f acc = aPlanet.force / aPlanet.mass;
+		ofVec3f acc = aPlanet.force / aPlanet.getMass();
 		aPlanet.vel = aPlanet.vel + acc * timeStep;
 		aPlanet.pos = aPlanet.pos + ofVec4f(aPlanet.vel * timeStep);
 	}
 
 	//Update the buffer
 	planetsBuf.updateData(planets);
-}
-
-void SolarSystem::updateStocks() {
-	//Do all of the stock fetching in a parallel thread 
-	//Avoid clogging up framerate.
-
 }
 
 void SolarSystem::StockUpdater::threadedFunction() {
@@ -157,6 +151,13 @@ void SolarSystem::StockUpdater::threadedFunction() {
 
 		if (parseSuccess) {
 			ofLogNotice() << "Stock " << json["t"].asString() << " price is " << json["l"].asString();
+			float price = std::stof(json["l"].asString());
+			planets.at(i).setMass(price * 100);
 		}
 	}
+}
+
+SolarSystem::~SolarSystem() {
+	dataFetcher.stopThread();
+	ofThread::getCurrentThread()->sleep(10);
 }

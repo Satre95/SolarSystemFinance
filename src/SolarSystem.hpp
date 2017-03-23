@@ -17,6 +17,7 @@ public:
 	//----------------------------------------------
 	//MARK: Public Methods
 	SolarSystem(vector<string> & stockSymbols, int numParticles = 10000);
+	~SolarSystem();
 
 	void draw();
 	void update();
@@ -37,7 +38,6 @@ private:
 
 	void updateParticles();
 	void updatePlanets();
-	void updateStocks();
 
 	//----------------------------------------------
 	//MARK: Private Vars
