@@ -11,8 +11,13 @@ uniform mat4 modelViewMatrix;
 uniform mat4 modelViewProjectionMatrix;
 
 void main() {
+
 	gl_Position = modelViewProjectionMatrix * position;
 	fragColor = color;
 
-
+	vec4 eyeCoord = modelViewMatrix * position;
+	float dist = sqrt(eyeCoord.x*eyeCoord.x + eyeCoord.y*eyeCoord.y + eyeCoord.z*eyeCoord.z);
+	float att	 = 6000.0 / dist;
+	
+	//gl_PointSize = att;
 }

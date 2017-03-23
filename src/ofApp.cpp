@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
 	vector<string> stocks = {
-		"AAPL", "MSFT", "GOOG", "BRK-A", "AMZN", "FB", "JNJ"
+		"AAPL", "MSFT", "GOOG", "AMZN", "FB", "JNJ"
 	};
 	ss = new SolarSystem(stocks, 5000);
 	camera.setTarget(ofVec3f(0));
@@ -73,5 +73,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 //--------------------------------------------------------------
 void ofApp::exit() {
+	ss->stop();
 	delete ss;
 }

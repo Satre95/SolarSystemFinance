@@ -27,9 +27,18 @@ SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles) {
 	//Setup buffers and vbo's
 	initBuffers();
 
+	//Load the texture for the billboards
+	ofDisableArbTex();
+	planetImage.load("Planet.png");
+	particleImage.load("Particle.png");
+	ofEnableAlphaBlending();
+
+	//Setup the texcoords
+
 	dataFetcher.stocksPtr = &stocks;
 	dataFetcher.planetsPtr = &planets;
 	dataFetcher.startThread(true);
+
 }
 
 void SolarSystem::initBuffers() {
@@ -70,21 +79,17 @@ void SolarSystem::draw() {
 
 void SolarSystem::drawParticles() {
 	celestialShader.begin();
-	float currPointSize;
-	glGetFloatv(GL_POINT_SIZE, &currPointSize);
-	glPointSize(5.0f);
+	particleImage.getTexture().bind();
 	particlesVbo.draw(GL_POINTS, 0, numParticles);
-	glPointSize(currPointSize);
+	particleImage.getTexture().unbind();
 	celestialShader.end();
 }
 
 void SolarSystem::drawPlanets() {
 	celestialShader.begin();
-	float currPointSize;
-	glGetFloatv(GL_POINT_SIZE, &currPointSize);
-	glPointSize(5.0f);
+	planetImage.getTexture().bind();
 	planetsVbo.draw(GL_POINTS, 0, numPlanets);
-	glPointSize(currPointSize);
+	planetImage.getTexture().unbind();
 	celestialShader.end();
 }
 
@@ -157,7 +162,11 @@ void SolarSystem::StockUpdater::threadedFunction() {
 	}
 }
 
-SolarSystem::~SolarSystem() {
+void SolarSystem::stop() {
 	dataFetcher.stopThread();
 	ofThread::getCurrentThread()->sleep(10);
+}
+
+SolarSystem::~SolarSystem() {
+	dataFetcher.stopThread();
 }

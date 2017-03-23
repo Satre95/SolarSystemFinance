@@ -21,6 +21,7 @@ public:
 
 	void draw();
 	void update();
+	void stop();
 
 	//----------------------------------------------
 	//MARK: Public Vars
@@ -51,5 +52,6 @@ private:
 	ofShader celestialShader;
 	vector<string> stocks;
 	StockUpdater dataFetcher;
-
+	ofImage planetImage;
+	ofImage particleImage;
 };
