@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
 #include <mutex>
+#include <atomic>
 
 struct SSPlanet {
 	SSPlanet() {
@@ -25,21 +26,24 @@ struct SSPlanet {
 	}
 
 	float getMass() {
-		std::lock_guard<std::mutex> lock(massMutex);
+        while(isWritingMass){} //Simple spin lock to enforce synch
+        //Condition var would be better, but situation is simple enough that
+        //performance impact is minimal.
 		return mass;
 	}
 
-	void setMass(float m) {
-		std::lock_guard<std::mutex> lock(massMutex);
+    void setMass(float m) {
+        isWritingMass = true;
 		mass = m;
+        isWritingMass = false;
 	}
 
-	std::mutex massMutex;
-
+    std::atomic_bool isWritingMass;
 	ofVec4f pos;
 	ofVec3f vel;
 	ofVec3f force;
 	ofFloatColor color;
 	float mass = 1.0f;
+    
 };
 

@@ -4,10 +4,7 @@
 #include "SSPlanet.hpp"
 #include "ofxGui.h"
 #include "ofxJSON.h"
-#include <boost/thread/barrier.hpp>
-
-
-#define NUM_PROC 4
+#include <thread>
 
 class SolarSystem {
 public:
@@ -32,7 +29,7 @@ public:
 	int numParticles, numPlanets;
 	ofParameter<float> gravityConstant = 0.01f;
 	ofParameter<float> timeStep = 0.4f;
-	ofParameter<float> solarMass = 10000.0f;
+	ofParameter<float> solarMass = 100000.0f;
 
 private:
 	//----------------------------------------------
@@ -43,6 +40,8 @@ private:
 
 	void updateParticles();
 	void updatePlanets();
+    void threadedUpdateParticles(vector<SSParticle> & particles, int start, int end, vector<SSPlanet> & planets);
+    void threadedUpdatePlanets(vector<SSPlanet> & planets, int start, int end);
 
 	//----------------------------------------------
 	//MARK: Private Vars
@@ -58,5 +57,5 @@ private:
 	StockUpdater dataFetcher;
 	ofImage planetImage;
 	ofImage particleImage;
-    boost::barrier bar;
+    const uint numThreads;
 };

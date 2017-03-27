@@ -3,8 +3,12 @@
 
 float SSParticle::mass = 10.0f;
 
-SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles): bar(3) {
-    this->numParticles = Utilities::roundUp(numParticles, NUM_PROC);
+SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles):
+numThreads( ofClamp(std::thread::hardware_concurrency(), 2, 128))
+
+{
+    numParticles = Utilities::roundUp(numParticles, numThreads-1);
+    this->numParticles = numParticles;
 	this->numPlanets = (int)stockSymbols.size();
 	this->stocks = stockSymbols;
 
@@ -109,74 +113,39 @@ void SolarSystem::update() {
 }
 
 void SolarSystem::updateParticles() {
+    vector<thread> threads;
+    //figure out starting points.
+    int start = 0;
+    int chunkSize = (int)particles.size() / (numThreads - 1);
     
-    //Iterate over every planet, adding up forces along the way.
-    for (SSParticle & p : particles) {
-        p.force = ofVec3f(0);
-        
-        for (SSPlanet & aPlanet : planets) {
-            //F = G * M * m / r^2
-            float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
-            ofVec3f force((aPlanet.pos - p.pos) * f);
-            p.force += force;
-        }
+    while (start < particles.size()) {
+        threads.emplace_back(&SolarSystem::threadedUpdateParticles, this, ref(particles), start, start + chunkSize, ref(planets));
+        start += chunkSize;
     }
     
-    //Perform foward Euler integration
-    for (SSParticle & p : particles) {
-        ofVec3f acc = p.force / p.mass;
-        p.vel = p.vel + acc * timeStep;
-        p.pos = p.pos + ofVec4f(p.vel * timeStep);
-    }
-//    vector<std::unique_ptr<std::thread>> threads;
-//    
-//    for(int i = 0; i < NUM_PROC; i++) {
-//        threads.emplace_back(new std::thread([this]() {
-//            //Iterate over every planet, adding up forces along the way.
-//            int start = NUM_PROC * this_thread::get_id();
-//            for (int i = start; i < end; i++) {
-//                auto & p = particles.at(i);
-//                p.force = ofVec3f(0);
-//                
-//                for (SSPlanet & aPlanet : planets) {
-//                    //F = G * M * m / r^2
-//                    float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
-//                    ofVec3f force((aPlanet.pos - p.pos) * f);
-//                    p.force += force;
-//                }
-//            }
-//            
-//            //Perform foward Euler integration
-//            for (int i = start; i < end; i++) {
-//                auto & p = particles.at(i);
-//                ofVec3f acc = p.force / p.mass;
-//                p.vel = p.vel + acc * timeStep;
-//                p.pos = p.pos + ofVec4f(p.vel * timeStep);
-//                
-//            }
-//            
-//            bar.wait();
-//        }, this));
-//    }
-//    
-//    for(auto & aThread: threads)
-//        aThread->join();
-
+    for(auto & aThread: threads)
+        aThread.join();
+    
 	//Update buffer and vbo
 	particlesBuf.updateData(particles);
 }
 
-void SolarSystem::updatePlanets() {
-	//Imagine there is a star at origin
-	for (SSPlanet & aPlanet : planets) {
-		aPlanet.force = ofVec3f(0);
-		float fMag = gravityConstant * solarMass * aPlanet.getMass() / pow(ofVec3f(aPlanet.pos).length(), 2);
-		aPlanet.force = -ofVec3f(aPlanet.pos) * fMag;
-		ofVec3f acc = aPlanet.force / aPlanet.getMass();
-		aPlanet.vel = aPlanet.vel + acc * timeStep;
-		aPlanet.pos = aPlanet.pos + ofVec4f(aPlanet.vel * timeStep);
-	}
-
+void SolarSystem::updatePlanets() { 
+    vector<thread> threads;
+    //figure out starting points
+    int start = 0;
+    int chunkSize = (int)planets.size() / (numThreads - 1);
+    while(start < planets.size()) {
+        int end = ofClamp(start + chunkSize, start, planets.size());
+        threads.emplace_back(&SolarSystem::threadedUpdatePlanets, this, ref(planets), start, end);
+        start += chunkSize;
+    }
+    
+//    threads.emplace_back(&SolarSystem::threadedUpdatePlanets, this, ref(planets), start, planets.size());
+    
+    for(auto & aThread: threads)
+        aThread.join();
+    
 	//Update the buffer
 	planetsBuf.updateData(planets);
 }
@@ -201,6 +170,42 @@ void SolarSystem::StockUpdater::threadedFunction() {
 			planets.at(i).setMass(price * 100);
 		}
 	}
+}
+
+void SolarSystem::threadedUpdateParticles(vector<SSParticle> & particles, int start, int end, vector<SSPlanet> & planets) {
+    //Iterate over every planet, adding up forces along the way.
+    for (int i = start; i < end; i++) {
+        auto & p = particles.at(i);
+        p.force = ofVec3f(0);
+        
+        for (SSPlanet & aPlanet : planets) {
+            //F = G * M * m / r^2
+            float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
+            ofVec3f force((aPlanet.pos - p.pos) * f);
+            p.force += force;
+        }
+    }
+    
+    //Perform foward Euler integration
+    for (int i = start; i < end; i++) {
+        auto & p = particles.at(i);
+        ofVec3f acc = p.force / p.mass;
+        p.vel = p.vel + acc * timeStep;
+        p.pos = p.pos + ofVec4f(p.vel * timeStep);
+    }
+}
+
+void SolarSystem::threadedUpdatePlanets(vector<SSPlanet> &planets, int start, int end) {
+    //Imagine there is a star at origin
+    for (int i = start; i < end; i++) {
+        auto & aPlanet = planets.at(i);
+        aPlanet.force = ofVec3f(0);
+        float fMag = gravityConstant * solarMass * aPlanet.getMass() / pow(ofVec3f(aPlanet.pos).length(), 2);
+        aPlanet.force = -ofVec3f(aPlanet.pos) * fMag;
+        ofVec3f acc = aPlanet.force / aPlanet.getMass();
+        aPlanet.vel = aPlanet.vel + acc * timeStep;
+        aPlanet.pos = aPlanet.pos + ofVec4f(aPlanet.vel * timeStep);
+    }
 }
 
 void SolarSystem::stop() {
