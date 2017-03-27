@@ -3,6 +3,7 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    ofSetFrameRate(60);
 	stocks = {
 		"FB", "JNJ",
         "XOM", "JPM", "WFC", "DIS", "GE", "NUGT", "SNAP"
@@ -14,12 +15,20 @@ void ofApp::setup() {
     camera.setFarClip(10000.0f);
     
     paused = true;
+    
+    gui.setup("Parameters");
+    gui.add(ss->gravityConstant.set("Gravity Constant (G)", 0.01f, 0.01f, 1.0f));
+    gui.add(ss->timeStep.set("Time Step", 0.4f, 0.01f, 0.8f));
+    gui.add(ss->solarMass.set("Star Mass", 100000, 100, 1000000));
+    gui.add(fps.set("FPS", 0, 0, 60));
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     if(paused) return;
 	ss->update();
+    fps = ofGetFrameRate();
 }
 
 //--------------------------------------------------------------
@@ -28,11 +37,8 @@ void ofApp::draw() {
 	camera.begin();
 	ss->draw();
     camera.end();
-
-	stringstream sstream;
-	sstream << "Framerate: " << ofGetFrameRate();
-	ofDrawBitmapString(sstream.str(), ofPoint(10, 10));
    
+    gui.draw();
 }
 
 //--------------------------------------------------------------

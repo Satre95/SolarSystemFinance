@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "SolarSystem.hpp"
-
+#include "ofxGui.h"
 class ofApp : public ofBaseApp {
 public:
 	void setup();
@@ -26,4 +26,7 @@ public:
 	SolarSystem * ss;
 	ofEasyCam camera;
     bool paused = false;
+    ofParameter<float> fps;
+    
+    ofxPanel gui;
 };

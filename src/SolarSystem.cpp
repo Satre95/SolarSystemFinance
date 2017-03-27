@@ -141,8 +141,6 @@ void SolarSystem::updatePlanets() {
         start += chunkSize;
     }
     
-//    threads.emplace_back(&SolarSystem::threadedUpdatePlanets, this, ref(planets), start, planets.size());
-    
     for(auto & aThread: threads)
         aThread.join();
     
