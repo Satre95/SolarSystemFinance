@@ -20,7 +20,7 @@ numThreads( ofClamp(std::thread::hardware_concurrency(), 2, 128))
 	//Init the planets
 	for (int j = 0; j < numPlanets; j++) {
 		ofVec3f pos = Utilities::randomPointBetweenSpheres(1000.0f, 3000.0f);
-		ofVec3f vel = Utilities::randomPointBetweenSpheres(10, 15);
+		ofVec3f vel = Utilities::randomPointBetweenSpheres(50, 100);
 		planets.emplace_back(pos,
 							vel,
 							ofRandom(2000, 4000));

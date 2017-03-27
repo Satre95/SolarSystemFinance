@@ -19,7 +19,7 @@ void ofApp::setup() {
     gui.setup("Parameters");
     gui.add(ss->gravityConstant.set("Gravity Constant (G)", 0.01f, 0.01f, 1.0f));
     gui.add(ss->timeStep.set("Time Step", 0.4f, 0.01f, 0.8f));
-    gui.add(ss->solarMass.set("Star Mass", 100000, 100, 1000000));
+    gui.add(ss->solarMass.set("Star Mass", 400000, 100, 1000000));
     gui.add(fps.set("FPS", 0, 0, 60));
     
 }
