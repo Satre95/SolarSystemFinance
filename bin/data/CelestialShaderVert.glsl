@@ -17,7 +17,7 @@ void main() {
 
 	vec4 eyeCoord = modelViewMatrix * position;
 	float dist = sqrt(eyeCoord.x*eyeCoord.x + eyeCoord.y*eyeCoord.y + eyeCoord.z*eyeCoord.z);
-	float att	 = 20.0f / dist;
+	float att	 = 20000000.0f / dist;
 	
-//	gl_PointSize = att;
+	gl_PointSize = att;
 }

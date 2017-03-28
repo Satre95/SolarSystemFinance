@@ -8,18 +8,17 @@ void ofApp::setup() {
 		"FB", "JNJ",
         "XOM", "JPM", "WFC", "DIS", "GE", "NUGT", "SNAP"
 	};
-	ss = new SolarSystem(stocks, 20000);
+	ss = new SolarSystem(stocks, 40000);
 	camera.setTarget(ofVec3f(0));
 	camera.setAutoDistance(true);
 	camera.setNearClip(1.0f);
-    camera.setFarClip(10000.0f);
-    
-    paused = true;
+    camera.setFarClip(70000.0f);
     
     gui.setup("Parameters");
-    gui.add(ss->gravityConstant.set("Gravity Constant (G)", 0.01f, 0.01f, 1.0f));
+    gui.add(ss->gravityConstant.set("Gravity Constant (G)", 0.008f, 0.001f, 0.5f));
     gui.add(ss->timeStep.set("Time Step", 0.4f, 0.01f, 0.8f));
-    gui.add(ss->solarMass.set("Star Mass", 400000, 100, 1000000));
+    gui.add(ss->solarMass.set("Star Mass", 5000000.0, 1000000.0, 1000000000.0));
+    gui.add(ss->dataFetcher.stockMassMultiplier.set("Stock Multiplier", 1000000, 500000, 10000000));
     gui.add(fps.set("FPS", 0, 0, 60));
     
 }

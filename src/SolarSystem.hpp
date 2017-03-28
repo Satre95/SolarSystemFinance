@@ -10,6 +10,7 @@ class SolarSystem {
 public:
 	class StockUpdater : public ofThread {
 	public:
+        ofParameter<double> stockMassMultiplier = 1000000;
 		const string stockURL = "http://finance.google.com/finance/info?client=ig&q=";
 		vector<string> * stocksPtr = nullptr;
 		vector<SSPlanet> * planetsPtr = nullptr;
@@ -27,10 +28,11 @@ public:
 	//----------------------------------------------
 	//MARK: Public Vars
 	int numParticles, numPlanets;
-	ofParameter<float> gravityConstant = 0.01f;
+	ofParameter<double> gravityConstant = 0.01f;
 	ofParameter<float> timeStep = 0.4f;
-	ofParameter<float> solarMass = 100000.0f;
-
+	ofParameter<double> solarMass = 1000000000.0;
+    StockUpdater dataFetcher;
+    
 private:
 	//----------------------------------------------
 	//MARK: Private Methods
@@ -54,7 +56,6 @@ private:
 	ofVbo particlesVbo, planetsVbo;
 	ofShader celestialShader;
 	vector<string> stocks;
-	StockUpdater dataFetcher;
 	ofImage planetImage;
 	ofImage particleImage;
     const uint numThreads;

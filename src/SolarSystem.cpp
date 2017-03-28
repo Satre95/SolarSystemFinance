@@ -1,7 +1,7 @@
 #include "SolarSystem.hpp"
 #include "Utilities.hpp"
 
-float SSParticle::mass = 10.0f;
+double SSParticle::mass = 20000;
 
 SolarSystem::SolarSystem(vector<string> & stockSymbols, int numParticles):
 numThreads( ofClamp(std::thread::hardware_concurrency(), 2, 128))
@@ -20,7 +20,7 @@ numThreads( ofClamp(std::thread::hardware_concurrency(), 2, 128))
 	//Init the planets
 	for (int j = 0; j < numPlanets; j++) {
 		ofVec3f pos = Utilities::randomPointBetweenSpheres(1000.0f, 3000.0f);
-		ofVec3f vel = Utilities::randomPointBetweenSpheres(50, 100);
+		ofVec3f vel = Utilities::randomPointBetweenSpheres(10, 50);
 		planets.emplace_back(pos,
 							vel,
 							ofRandom(2000, 4000));
@@ -165,7 +165,7 @@ void SolarSystem::StockUpdater::threadedFunction() {
 		if (parseSuccess) {
 			ofLogNotice() << "Stock " << json["t"].asString() << " price is " << json["l"].asString();
 			float price = std::stof(json["l"].asString());
-			planets.at(i).setMass(price * 100);
+            planets.at(i).setMass(price * stockMassMultiplier);
 		}
 	}
 }
@@ -179,7 +179,7 @@ void SolarSystem::threadedUpdateParticles(vector<SSParticle> & particles, int st
         for (SSPlanet & aPlanet : planets) {
             //F = G * M * m / r^2
             float f = gravityConstant * aPlanet.getMass() * p.mass / pow(aPlanet.pos.distance(p.pos), 2);
-            ofVec3f force((aPlanet.pos - p.pos) * f);
+            ofVec3f force((aPlanet.pos - p.pos).normalize() * f);
             p.force += force;
         }
     }
@@ -199,7 +199,7 @@ void SolarSystem::threadedUpdatePlanets(vector<SSPlanet> &planets, int start, in
         auto & aPlanet = planets.at(i);
         aPlanet.force = ofVec3f(0);
         float fMag = gravityConstant * solarMass * aPlanet.getMass() / pow(ofVec3f(aPlanet.pos).length(), 2);
-        aPlanet.force = -ofVec3f(aPlanet.pos) * fMag;
+        aPlanet.force = -ofVec3f(aPlanet.pos).normalize() * fMag;
         ofVec3f acc = aPlanet.force / aPlanet.getMass();
         aPlanet.vel = aPlanet.vel + acc * timeStep;
         aPlanet.pos = aPlanet.pos + ofVec4f(aPlanet.vel * timeStep);

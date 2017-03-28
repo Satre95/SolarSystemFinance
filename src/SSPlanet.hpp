@@ -10,7 +10,7 @@ struct SSPlanet {
 		color = ofFloatColor(1.0f, 0, 0, 1.0f);
 	}
 
-	SSPlanet(ofVec3f pos, ofVec3f vel, float mass = 1000.0f) {
+	SSPlanet(ofVec3f pos, ofVec3f vel, double mass = 1000) {
 		this->pos = ofVec4f(pos.x, pos.y, pos.z, 1.0f);
 		this->vel = vel;
 		color = ofFloatColor(1.0f, 0, 0, 1.0f);
@@ -32,7 +32,7 @@ struct SSPlanet {
 		return mass;
 	}
 
-    void setMass(float m) {
+    void setMass(double m) {
         isWritingMass = true;
 		mass = m;
         isWritingMass = false;
@@ -43,7 +43,7 @@ struct SSPlanet {
 	ofVec3f vel;
 	ofVec3f force;
 	ofFloatColor color;
-	float mass = 1.0f;
+	double mass = 1.0f;
     
 };
 
